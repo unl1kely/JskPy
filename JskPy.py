@@ -12,7 +12,8 @@ if not __name__ in __file__:
 def shell_response(command):
 	from os import popen
 	output = popen(command).read()
-	if not output: # if output gives error message
+	error = not output
+	if error: # if output gives error message
 		from sys import stdout
 		stdout.write("\033[F\033[K") # clear error message
 		stdout.flush() # makes sure error message is cleared
@@ -23,6 +24,70 @@ if "linux" in platform:
 	if isTermux:
 		platform = "termux"
 
+def encodeUrl(url):
+	encodingDict = {
+		"%": "%25",
+		" ": "%20",
+		"!": "%21",
+		'"': "%22",
+		"#": "%23",
+		"$": "%24",
+		"&": "%26",
+		"'": "%27",
+		"(": "%28",
+		")": "%29",
+		"*": "%2A",
+		"+": "%2B",
+		",": "%2C",
+		"-": "%2D",
+		".": "%2E",
+		"/": "%2F",
+		":": "%3A",
+		";": "%3B",
+		"<": "%3C",
+		"=": "%3D",
+		">": "%3E",
+		"?": "%3F",
+		"@": "%40",
+		"[": "%5B",
+		"\\": "%5C",
+		"]": "%5D",
+		"^": "%5E",
+		"_": "%5F",
+		"{": "%7B",
+		"|": "%7C",
+		"}": "%7D",
+		"~": "%7E"
+	}
+	for char in encodingDict:
+		url = url.replace(char, encodingDict[char])
+	return url
+def best_match(keyword, data):
+	# checking arguments
+	if type(keyword)!=str:
+		message = "<keyword> argument should be string. Passed :", type(keyword)
+		raise TypeError(message)
+	if not type(data) in [list, set, tuple]:
+		message = "<data> argument should be an iterable type. Passed :", type(data)
+		raise TypeError(message)
+	#####
+	keywords = keyword.split()
+	matches = dict()
+	title_index = 0
+	for title in data:
+		checker = 0
+		for word in keywords:
+			if word.casefold() in title.casefold():
+				checker += 1
+		if len(keywords)==checker:
+			matches[title_index] = len(title)
+		title_index += 1
+	if len(matches)==0:
+		return None
+	filtered = {k: v for k, v in sorted(matches.items(), key=lambda item: item[1])}
+	for index in filtered:
+		return index
+		break
 class yella:
 	# a class that contains static methods used to check if a variable/module/package is installed/exists
 	# system packages manager
